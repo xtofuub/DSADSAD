@@ -643,7 +643,7 @@ function Start-NetworkMonitor {
 }
 # --- ONLINE/OFFLINE NOTIFIER END ---
 
-$botToken = "7988372515:AAGL_MGlI9zLvOeV8_5PpdY5BMBOz2m-8AY"
+$botToken = "8352074446:AAF1rNLVf3qGkJHBlcYPXZIXxqW95INeL_A"
 $userId = "5036966807"
 $apiUrl = "https://api.telegram.org/bot$botToken"
 $lastUpdateId = 0 # Initial default
@@ -940,3 +940,4 @@ while ($true) {
     }
 
 }
+
